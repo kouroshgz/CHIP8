@@ -27,7 +27,7 @@ public:
 
 // --------- methods ----------
 	// initialize registers, memory, etc to initial state
-	void initialize(chip8 CHIP);
+	void initialize();
 
 };
 
