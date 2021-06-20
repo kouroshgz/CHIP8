@@ -23,5 +23,29 @@ void chip8::initialize() {
 }
 
 bool chip8::loadROM(const string& ROM) {
-
+	// create filestream, open rom file in binary mode, filepointer starting at end
+	ifstream file(ROM, ios::binary, ios::ate);
+	if (file.is_open()) {
+		// get file size
+		int size = file.tellg();
+		// return file pointer to beginning of file
+		file.seekg(0, ios::beg);
+		// create buffer
+		char* buff = new char[size];
+		// read file into buffer
+		file.read(buff, size);
+		// close file
+		file.close();
+		// load rom into memory, starting at address 0x200
+		for (int i = 0; i < size; i++) {
+			memory[0x200 + i] = buff[i];
+		}
+		// free memory allocated for buffer
+		delete[] buff; 
+	}
+	else {
+		cerr << "ROM file couldnt be opened!";
+		return false;
+	}
+	return true;
 }
