@@ -1,5 +1,9 @@
 #pragma once
 #include <cstdint>
+#include <fstream>
+#include <iostream>
+#include <string>
+using namespace std;
 class chip8
 {
 public:
@@ -28,6 +32,8 @@ public:
 // --------- methods ----------
 	// initialize registers, memory, etc to initial state
 	void initialize();
+	// load rom, return 1 if success -1 if not
+	bool loadROM(const string& ROM);
 
 };
 

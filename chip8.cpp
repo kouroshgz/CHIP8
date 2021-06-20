@@ -21,3 +21,7 @@ void chip8::initialize() {
 		memory[i] = 0;
 
 }
+
+bool chip8::loadROM(const string& ROM) {
+
+}
