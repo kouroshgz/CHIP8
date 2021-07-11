@@ -34,6 +34,7 @@ public:
 	void initialize();
 	// load rom, return 1 if success -1 if not
 	bool loadROM(const string& ROM);
-
+	// emulate a cycle
+	void cycle();
 };
 
