@@ -1,4 +1,5 @@
 #include "chip8.h"
+
 void chip8::initialize() {
 	// reset states 
 	pc = 0x200;
@@ -60,31 +61,31 @@ void chip8::cycle() {
 	uint16_t opcode = memory[pc] << 8 || memory[pc + 1];
 
 	// decoding opcodes
-	switch (opcode & 0xF000) {
-		case 0x0000:
-			switch (opcode & 0x000F) { // case for opcodes beginning with 0x0
-				case 0x0000: // 0x00E0 clear screen opcode
-					/* implement here later*/
-				break;
+	//switch (opcode & 0xF000) {
+	//	case 0x0000:
+	//		switch (opcode & 0x000F) { // case for opcodes beginning with 0x0
+	//			case 0x0000: // 0x00E0 clear screen opcode
+	//				/* implement here later*/
+	//			break;
 
-				case 0x000E: // 0x00EE return from subroutine opcode
-					/* implement here later */
-				break;
+	//			case 0x000E: // 0x00EE return from subroutine opcode
+	//				/* implement here later */
+	//			break;
 
-				default:
-					cout << "Unknown OPCODE: " << opcode << endl;
-			}
-		break;
-		
-		// ANNN: Sets index to addr NNN
-		case 0xA000:
-			index = opcode & 0x0FFF;
-			pc += 2;
-		break;
+	//			default:
+	//				cout << "Unknown OPCODE: " << opcode << endl;
+	//		}
+	//	break;
+	//	
+	//	// ANNN: Sets index to addr NNN
+	//	case 0xA000:
+	//		index = opcode & 0x0FFF;
+	//		pc += 2;
+	//	break;
 
-		default:
-			cout << "Opcode unknown: " << opcode << endl; 
+	//	default:
+	//		cout << "Opcode unknown: " << opcode << endl; 
 
-	}
+	//}
 
 }
