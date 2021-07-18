@@ -27,10 +27,11 @@ void chip8::initialize() {
 	sp = 0;
 
 	// Clear display	
-	for (int i = 0; i < 64; i++) {
+	/*for (int i = 0; i < 64; i++) {
 		for (int j = 0; j < 32; j++)
 			display[i][j] = 0;
-	}
+	}*/
+	memset(display, 0, 64 * 32 * sizeof(display[0][0]));
 	// Clear registers V0-VF + stack
 	for (int i = 0; i < 16; i++) {
 		registers[i] = 0;
@@ -42,7 +43,7 @@ void chip8::initialize() {
 
 	// load fontset 
 	for (int i = 0; i < 80; i++) {
-		// font set loaded in beginning at memory location 0x50
+		// font set loaded in, beginning at memory location 0x50
 		memory[0x50 + i] = fontSet[i];  
 	}
 	// reset timers
@@ -75,6 +76,98 @@ bool chip8::loadROM(const string& ROM) {
 		return false;
 	}
 	return true;
+}
+
+// 00E0 - dispay clear opcode
+void chip8::x00E0() {
+	memset(display, 0, 64 * 32 * sizeof(display[0][0]));
+}
+// 00EE - return from subroutine
+void chip8::x00EE() {
+	// decrement sp to previous subroutine
+	--sp;
+	// set pc to sp location in stack
+	pc = stack[sp];
+}
+// 1NNN - jump to address NNN
+void chip8::x1NNN() {
+	// obtain address NNN
+	uint16_t addr = opcode & 0x0FFF;
+	// set program counter to NNN
+	pc = addr; 
+}
+
+// 2NNN - call subroutine at NNN
+void chip8::x2NNN() {
+	uint16_t addr = opcode & 0x0FFF;
+	// move PC to top of stack, holds instruction after call()
+	stack[sp] = pc;
+	// increment SP to next instruction
+	sp++;
+	// set PC to address of subroutine 
+	pc = addr;
+}
+
+// 3XNN - skip next instr if VX == NN
+void chip8::x3XNN(){
+	// get register identifier
+	uint8_t X = (opcode & 0x0F00) >> 8;
+	// get 8 bit const
+	uint8_t NN = (opcode & 0x00FF);
+	// if VX == NN, skip
+	if (registers[X] == NN)
+		pc += 2;
+}
+
+// 4XNN - skip next instruction if VX != NN
+void chip8::x4XNN() {
+	// get register identifier
+	uint8_t X = (opcode & 0x0F00) >> 8;
+	// get 8 bit const
+	uint8_t NN = (opcode & 0x00FF);
+	// if VX != NN, skip
+	if (registers[X] != NN)
+		pc += 2;
+}
+
+// 5XY0 - Skips next instruction if VX == VY
+void chip8::x5XY0() {
+	// get register identifier
+	uint8_t X = (opcode & 0x0F00) >> 8;
+	uint8_t Y = (opcode & 0x00F0) >> 4;
+
+	if (registers[X] == registers[Y])
+		pc += 2; 
+}
+
+// 6XNN - set VX to NN
+void chip8::x6XNN() {
+	// get register identifier
+	uint8_t X = (opcode & 0x0F00) >> 8;
+	// get NN
+	uint8_t NN = (opcode & 0x00FF);
+
+	registers[X] = NN;
+}
+
+// 7XNN - adds NN to VX, dont change carry flag
+void chip8::x7XNN() {
+	// get register identifier
+	uint8_t X = (opcode & 0x0F00) >> 8;
+	// get NN
+	uint8_t NN = (opcode & 0x00FF);
+
+	registers[X] += NN;
+}
+
+//Skips the next instruction if VX does not equal VY. (Usually the next instruction is a jump to skip a code block);
+void chip8::x9XY0() {
+	// get register identifier
+	uint8_t X = (opcode & 0x0F00) >> 8;
+	uint8_t Y = (opcode & 0x00F0) >> 4;
+
+	if (registers[X] != registers[Y])
+		pc += 2;
 }
 
 void chip8::cycle() {

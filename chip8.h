@@ -54,9 +54,10 @@ public:
 	void x00E0();
 	// 00EE - return from subroutine
 	void x00EE();
-	// 1NNN - jump to address NNN
+	
 
 // ---- unique group ---
+	// 1NNN - jump to address NNN
 	void x1NNN();
 	// 2NNN - call subroutine at NNN
 	void x2NNN();
@@ -65,7 +66,7 @@ public:
 	// 4XNN - skip next instruction if VX != NN
 	void x4XNN();
 	// 5XY0 - Skips next instruction if VX == VY
-	void x5Y0();
+	void x5XY0();
 	// 6XNN - set VX to NN
 	void x6XNN();
 	// 7XNN - adds NN to VX, dont change carry flag
