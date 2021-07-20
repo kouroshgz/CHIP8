@@ -170,12 +170,88 @@ void chip8::x9XY0() {
 		pc += 2;
 }
 
+// opcode to set index to address NNN
+void chip8::xANNN() {
+	uint16_t addr = (opcode & 0x0FFF);
+	pc = addr;
+}
+
+//Jumps to the address NNN plus V0.
+void chip8::xBNNN() {
+	uint16_t addr = (opcode & 0x0FFF) + registers[0];
+	pc = addr; 
+}
+
+//Sets VX to the result of a bitwise and operation on a random number (Typically: 0 to 255) and NN
+void chip8::xCXNN() {
+	uint8_t NN = (opcode & 0x0FF);
+
+}
+
+// draw graphics
+void chip8::xDXYN() {
+
+}
+
+// 8XY0 - Sets VX to value of VY
+void chip8::x8XY0() {
+	uint8_t X = (opcode & 0x0F00) >> 8;
+	uint8_t Y = (opcode & 0x00F0) >> 4;
+	
+	registers[X] = registers[Y];
+}
+
+//Sets VX to VX or VY. (Bitwise OR operation)
+void chip8::x8XY1() {
+	uint8_t X = (opcode & 0x0F00) >> 8;
+	uint8_t Y = (opcode & 0x00F0) >> 4;
+
+	registers[X] = (registers[X] | registers[Y]);
+}
+
+//Sets VX to VXand VY. (Bitwise AND operation);
+void chip8::x8XY2() {
+	uint8_t X = (opcode & 0x0F00) >> 8;
+	uint8_t Y = (opcode & 0x00F0) >> 4;
+
+	registers[X] = (registers[X] & registers[Y]);
+}
+
+//Sets VX to VX xor VY.
+void chip8::x8XY3() {
+	uint8_t X = (opcode & 0x0F00) >> 8;
+	uint8_t Y = (opcode & 0x00F0) >> 4;
+
+	registers[X] = (registers[X] ^ registers[Y]);
+}
+
+//Adds VY to VX.VF is set to 1 when there's a carry, and to 0 when there is not.
+void chip8::x8XY4() {
+	uint8_t X = (opcode & 0x0F00) >> 8;
+	uint8_t Y = (opcode & 0x00F0) >> 4;
+	uint16_t sum = registers[X] + registers[Y];
+	// carry occurs when sum > 8 bits (255)
+	if (sum > 255)
+		// set carry flag
+		registers[0xF] = 1;
+	else
+		registers[0xF] = 0;
+
+	// only store lowest 8 bits
+	registers[X] = (sum & 0xFF);
+}
+
+//VY is subtracted from VX.VF is set to 0 when there's a borrow, and 1 when there is not.
+void chip8::x8XY5() {
+
+}
+
 void chip8::cycle() {
 	// fetch opcode
 	/*
 	lhsf 8 bits OR'd with pc+1 to complete opcode
 	*/
-	uint16_t opcode = memory[pc] << 8 || memory[pc + 1];
+	uint16_t opcode = memory[pc] << 8 | memory[pc + 1];
 
 	// decoding opcodes
 	//switch (opcode & 0xF000) {

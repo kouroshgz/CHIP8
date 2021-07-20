@@ -4,7 +4,13 @@
 #include <iostream>
 #include <string>
 #include <unordered_map>
+#include <random>
 using namespace std;
+
+// pseudo random number generator
+default_random_engine gen;
+uniform_int_distribution<int> distribution(0, 255);
+
 class chip8
 {
 private:
