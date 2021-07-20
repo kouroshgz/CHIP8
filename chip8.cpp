@@ -1,4 +1,10 @@
 #include "chip8.h"
+#define X(op)   ((op & 0x0F00) >> 8)
+#define Y(op)   ((op & 0x00F0) >> 4)
+#define N(op)   (op & 0x000F)
+#define NN(op)  (op & 0x00FF)
+#define NNN(op) (op & 0x0FFF)
+
 uint8_t fontSet[80] =
 {
 	0xF0, 0x90, 0x90, 0x90, 0xF0, //0
@@ -92,100 +98,102 @@ void chip8::x00EE() {
 // 1NNN - jump to address NNN
 void chip8::x1NNN() {
 	// obtain address NNN
-	uint16_t addr = opcode & 0x0FFF;
+	//uint16_t addr = opcode & 0x0FFF;
 	// set program counter to NNN
-	pc = addr; 
+	pc = NNN(opcode); 
 }
 
 // 2NNN - call subroutine at NNN
 void chip8::x2NNN() {
-	uint16_t addr = opcode & 0x0FFF;
+	//uint16_t addr = opcode & 0x0FFF;
+	
 	// move PC to top of stack, holds instruction after call()
 	stack[sp] = pc;
 	// increment SP to next instruction
 	sp++;
 	// set PC to address of subroutine 
-	pc = addr;
+	pc = NNN(opcode);
 }
 
 // 3XNN - skip next instr if VX == NN
 void chip8::x3XNN(){
 	// get register identifier
-	uint8_t X = (opcode & 0x0F00) >> 8;
+//	uint8_t X = (opcode & 0x0F00) >> 8;
 	// get 8 bit const
-	uint8_t NN = (opcode & 0x00FF);
+//	uint8_t NN = (opcode & 0x00FF);
 	// if VX == NN, skip
-	if (registers[X] == NN)
+	if (registers[X(opcode)] == NN(opcode) )
 		pc += 2;
 }
 
 // 4XNN - skip next instruction if VX != NN
 void chip8::x4XNN() {
 	// get register identifier
-	uint8_t X = (opcode & 0x0F00) >> 8;
+//	uint8_t X = (opcode & 0x0F00) >> 8;
 	// get 8 bit const
-	uint8_t NN = (opcode & 0x00FF);
+//	uint8_t NN = (opcode & 0x00FF);
 	// if VX != NN, skip
-	if (registers[X] != NN)
+	if (registers[X(opcode)] != NN(opcode))
 		pc += 2;
 }
 
 // 5XY0 - Skips next instruction if VX == VY
 void chip8::x5XY0() {
 	// get register identifier
-	uint8_t X = (opcode & 0x0F00) >> 8;
-	uint8_t Y = (opcode & 0x00F0) >> 4;
+//	uint8_t X = (opcode & 0x0F00) >> 8;
+//	uint8_t Y = (opcode & 0x00F0) >> 4;
 
-	if (registers[X] == registers[Y])
+	if (registers[X(opcode)] == registers[Y(opcode)])
 		pc += 2; 
 }
 
 // 6XNN - set VX to NN
 void chip8::x6XNN() {
 	// get register identifier
-	uint8_t X = (opcode & 0x0F00) >> 8;
+//	uint8_t X = (opcode & 0x0F00) >> 8;
 	// get NN
-	uint8_t NN = (opcode & 0x00FF);
+//	uint8_t NN = (opcode & 0x00FF);
 
-	registers[X] = NN;
+	registers[X(opcode)] = NN(opcode);
 }
 
 // 7XNN - adds NN to VX, dont change carry flag
 void chip8::x7XNN() {
 	// get register identifier
-	uint8_t X = (opcode & 0x0F00) >> 8;
+//	uint8_t X = (opcode & 0x0F00) >> 8;
 	// get NN
-	uint8_t NN = (opcode & 0x00FF);
+//	uint8_t NN = (opcode & 0x00FF);
 
-	registers[X] += NN;
+	registers[X(opcode)] += NN(opcode);
 }
 
 //Skips the next instruction if VX does not equal VY. (Usually the next instruction is a jump to skip a code block);
 void chip8::x9XY0() {
 	// get register identifier
-	uint8_t X = (opcode & 0x0F00) >> 8;
-	uint8_t Y = (opcode & 0x00F0) >> 4;
+//	uint8_t X = (opcode & 0x0F00) >> 8;
+//	uint8_t Y = (opcode & 0x00F0) >> 4;
 
-	if (registers[X] != registers[Y])
+	if (registers[X(opcode)] != registers[Y(opcode)])
 		pc += 2;
 }
 
 // opcode to set index to address NNN
 void chip8::xANNN() {
-	uint16_t addr = (opcode & 0x0FFF);
-	pc = addr;
+	///uint16_t addr = (opcode & 0x0FFF);
+	pc = NNN(opcode);
 }
 
 //Jumps to the address NNN plus V0.
 void chip8::xBNNN() {
-	uint16_t addr = (opcode & 0x0FFF) + registers[0];
-	pc = addr; 
+	//uint16_t addr = (opcode & 0x0FFF) + registers[0];
+	pc = NNN(opcode); 
 }
 
 //Sets VX to the result of a bitwise and operation on a random number (Typically: 0 to 255) and NN
 void chip8::xCXNN() {
-	uint8_t NN = (opcode & 0x0FF);
-
+	//uint8_t NN = (opcode & 0x0FF);
+	uint8_t random = distribution(gen);
+	registers[X(opcode)] = NN(opcode) & random;
 }
 
 // draw graphics
@@ -195,41 +203,41 @@ void chip8::xDXYN() {
 
 // 8XY0 - Sets VX to value of VY
 void chip8::x8XY0() {
-	uint8_t X = (opcode & 0x0F00) >> 8;
-	uint8_t Y = (opcode & 0x00F0) >> 4;
+//	uint8_t X = (opcode & 0x0F00) >> 8;
+//	uint8_t Y = (opcode & 0x00F0) >> 4;
 	
-	registers[X] = registers[Y];
+	registers[X(opcode)] = registers[Y(opcode)];
 }
 
 //Sets VX to VX or VY. (Bitwise OR operation)
 void chip8::x8XY1() {
-	uint8_t X = (opcode & 0x0F00) >> 8;
-	uint8_t Y = (opcode & 0x00F0) >> 4;
+	//uint8_t X = (opcode & 0x0F00) >> 8;
+//	uint8_t Y = (opcode & 0x00F0) >> 4;
 
-	registers[X] = (registers[X] | registers[Y]);
+	registers[X(opcode)] = (registers[X(opcode)] | registers[Y(opcode)]);
 }
 
 //Sets VX to VXand VY. (Bitwise AND operation);
 void chip8::x8XY2() {
-	uint8_t X = (opcode & 0x0F00) >> 8;
-	uint8_t Y = (opcode & 0x00F0) >> 4;
+	//uint8_t X = (opcode & 0x0F00) >> 8;
+	//uint8_t Y = (opcode & 0x00F0) >> 4;
 
-	registers[X] = (registers[X] & registers[Y]);
+	registers[X(opcode)] = (registers[X(opcode)] & registers[Y(opcode)]);
 }
 
 //Sets VX to VX xor VY.
 void chip8::x8XY3() {
-	uint8_t X = (opcode & 0x0F00) >> 8;
-	uint8_t Y = (opcode & 0x00F0) >> 4;
+	//uint8_t X = (opcode & 0x0F00) >> 8;
+	//uint8_t Y = (opcode & 0x00F0) >> 4;
 
-	registers[X] = (registers[X] ^ registers[Y]);
+	registers[X(opcode)] = (registers[X(opcode)] ^ registers[Y(opcode)]);
 }
 
 //Adds VY to VX.VF is set to 1 when there's a carry, and to 0 when there is not.
 void chip8::x8XY4() {
-	uint8_t X = (opcode & 0x0F00) >> 8;
-	uint8_t Y = (opcode & 0x00F0) >> 4;
-	uint16_t sum = registers[X] + registers[Y];
+	//uint8_t X = (opcode & 0x0F00) >> 8;
+	//uint8_t Y = (opcode & 0x00F0) >> 4;
+	uint16_t sum = registers[X(opcode)] + registers[Y(opcode)];
 	// carry occurs when sum > 8 bits (255)
 	if (sum > 255)
 		// set carry flag
@@ -238,12 +246,136 @@ void chip8::x8XY4() {
 		registers[0xF] = 0;
 
 	// only store lowest 8 bits
-	registers[X] = (sum & 0xFF);
+	registers[X(opcode)] = (sum & 0xFF);
 }
 
 //VY is subtracted from VX.VF is set to 0 when there's a borrow, and 1 when there is not.
 void chip8::x8XY5() {
+	//uint8_t X = (opcode & 0x0F00) >> 8;
+	//uint8_t Y = (opcode & 0x00F0) >> 4;
+	// if no borrow
+	if (registers[X(opcode)] >= registers[Y(opcode)])
+		registers[0xF] = 1;		// VF = 1
+	else
+		registers[0xF] = 0;		// VF = 0
 
+	registers[X(opcode)] -= registers[Y(opcode)];
+
+}
+
+//Stores the least significant bit of VX in VF and then shifts VX to the right by 1.
+void chip8::x8XY6() {
+	//uint8_t X = (opcode & 0x0F00) >> 8;
+	// grab LSB 0x01
+	registers[0xF] = registers[X(opcode)] & 0x01; 
+	registers[X(opcode)] >>= 1;
+}
+
+//Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there is not.
+void chip8::x8XY7() {
+//	uint8_t X = (opcode & 0x0F00) >> 8;
+//	uint8_t Y = (opcode & 0x00F0) >> 4;
+	// if no borrow
+	if (registers[Y(opcode)] >= registers[X(opcode)])
+		registers[0xF] = 1;		// VF = 1
+	else
+		registers[0xF] = 0;		// VF = 0
+
+	registers[Y(opcode)] -= registers[X(opcode)];
+
+}
+
+//Stores the most significant bit of VX in VF and then shifts VX to the left by 1.
+void chip8::x8XYE() {
+//	uint8_t X = (opcode & 0x0F00) >> 8;
+	// grab MSB 0x80
+	registers[0xF] = registers[X(opcode)] & 0x80;
+	// VX = VX << 1
+	registers[X(opcode)] <<= 1;
+}
+
+//Skips the next instruction if the key stored in VX is pressed. (Usually the next instruction is a jump to skip a code block)
+void chip8::xEX9E() {
+//	uint8_t X = (opcode & 0x0F00) >> 8;
+	// store key value
+	uint8_t key = registers[X(opcode)];
+	// if key pressed, skip instruction
+	if (keypad[key])
+		pc += 2;
+}
+
+// Skips the next instruction if the key stored in VX is not pressed. (Usually the next instruction is a jump to skip a code block);
+void chip8::xEXA1() {
+	//uint8_t X = (opcode & 0x0F00) >> 8;
+	// store key value
+	uint8_t key = registers[X(opcode)];
+	// if key not pressed, skip instruction
+	if (!keypad[key])
+		pc += 2;
+}
+
+//Sets VX to the value of the delay timer
+void chip8::xFX07() {
+	//uint8_t X = (opcode & 0x0F00) >> 8;
+	registers[X(opcode)] = delayTimer;
+}
+
+//A key press is awaited, and then stored in VX. (Blocking Operation.All instruction halted until next key event)
+void chip8::xFX0A() {
+	for (int i = 0; i < 16; i++) {
+		if (keypad[i])
+			registers[X(opcode)] = i;
+	}
+}
+
+//Sets the delay timer to VX.
+void chip8::xFX15() {
+	delayTimer = registers[X(opcode)];
+}
+
+//Sets the sound timer to VX
+void chip8::xFX18() {
+	soundTimer = registers[X(opcode)];
+}
+
+// Adds VX to I. VF is not affected
+void chip8::xFX1E() {
+	index += registers[X(opcode)];
+}
+
+// Sets I to the location of the sprite for the character in VX. Characters 0-F (in hexadecimal) are represented by a 4x5 font
+void chip8::xFX29() {
+	// fontset begins at 0x50, chars are 5 bytes each, so offset from starting point
+	index = 0x50 + (registers[X(opcode)] * 5);
+}
+
+//set_BCD(Vx)
+void chip8::xFX33() {
+	uint8_t num = registers[X(opcode)];
+	int i = 2;
+	// begins at I+2, num % 10 to get rightmost digit, num / 10 to remove rightmost digit
+	// thus loops throught ones place, tens place, hundreds place
+	while (i >= 0) {
+		memory[index + i] = num % 10;
+		num /= 10; 
+		i--;
+	}
+}
+
+// Stores V0 to VX (including VX) in memory starting at address I. 
+// The offset from I is increased by 1 for each value written, but I itself is left unmodified
+void chip8::xFX55() {
+	for (int i = 0; i <= X(opcode); i++) {
+		memory[index + i] = registers[i];
+	}
+}
+
+// Fills V0 to VX(including VX) with values from memory starting at address I.
+// The offset from I is increased by 1 for each value written, but I itself is left unmodified
+void chip8::xFX65() {
+	for (int i = 0; i <= X(opcode); i++) {
+		registers[i] = memory[index + i];
+	}
 }
 
 void chip8::cycle() {
