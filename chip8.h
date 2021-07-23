@@ -15,11 +15,16 @@ class chip8
 {
 private:
 	// function pointer type
-	typedef void (*instruction)(void); 
+	typedef void (chip8::*instruction)(void); 
 	// opcode table (map of function pointers, with key = opcode and value = function pointer
 	typedef unordered_map<uint16_t, instruction> opTable;
+	
 	// class opTable object
-	opTable m;
+	opTable main;
+	opTable x8;
+	opTable EX;
+	opTable FX;
+	opTable x0;
 	// 16 8 bit V registers (V0 -> VF)
 	uint8_t registers[16];
 	// 4kb memory
@@ -41,17 +46,22 @@ private:
 	uint32_t display[64][32];
 	// opcodes
 	uint16_t opcode;
-	
+	chip8();
+
+
+	void x8Table();
+	void exTable();
+	void fxTable();
+	void x0Table();
 	
 public:
 // --------- methods ----------
 	// initialize registers, memory, etc to initial state
-	void initialize();
+	//void initialize();  <--- constructor can do that
 	// load rom, return 1 if success -1 if not
 	bool loadROM(const string& ROM);
 	// emulate a cycle
 	void cycle();
-	
 // ---- opcode declarations ----
 	// opcode descriptions from https://en.wikipedia.org/wiki/CHIP-8#Opcode_table
 

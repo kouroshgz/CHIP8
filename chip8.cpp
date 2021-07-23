@@ -25,7 +25,7 @@ uint8_t fontSet[80] =
 	0xF0, 0x80, 0xF0, 0x80, 0x80  //F
 };
 
-void chip8::initialize() {
+chip8::chip8() {
 	// reset states 
 	pc = 0x200;
 	index = 0;
@@ -50,11 +50,134 @@ void chip8::initialize() {
 	// load fontset 
 	for (int i = 0; i < 80; i++) {
 		// font set loaded in, beginning at memory location 0x50
-		memory[0x50 + i] = fontSet[i];  
+		memory[0x50 + i] = fontSet[i];
 	}
 	// reset timers
-	// reset display 
+	delayTimer = 0;
+	soundTimer = 0;
+
+	// set up opcode hash map
+
+	// 4 special cases, pointers to functions that will call functions from appropriate hashmap
+	main.emplace(0x0, &chip8::x0Table);
+	main.emplace(0x8, &chip8::x8Table);
+	main.emplace(0xE, &chip8::exTable);
+	main.emplace(0xF, &chip8::fxTable);
+	
+	// case for unique opcodes
+	main.emplace(0x1, &chip8::x1NNN);
+	main.emplace(0x2, &chip8::x2NNN);
+	main.emplace(0x3, &chip8::x3XNN);
+	main.emplace(0x4, &chip8::x4XNN);
+	main.emplace(0x5, &chip8::x5XY0);
+	main.emplace(0x6, &chip8::x6XNN);
+	main.emplace(0x7, &chip8::x7XNN);
+	main.emplace(0x9, &chip8::x9XY0);
+	main.emplace(0xA, &chip8::xANNN);
+	main.emplace(0xB, &chip8::xBNNN);
+	main.emplace(0xC, &chip8::xCXNN);
+	main.emplace(0xD, &chip8::xDXYN);
+
+	// opcodes beginning with 0x0
+	// will be identified w/ rightmost digit
+	x0.emplace(0x0, &chip8::x00E0);
+	x0.emplace(0xE, &chip8::x00EE);
+
+	// opcodes beginning with 0xF | identified by 2 rightmost as there are repeats
+	FX.emplace(0x07, &chip8::xFX07);
+	FX.emplace(0x0A, &chip8::xFX0A);
+	FX.emplace(0x15, &chip8::xFX15);
+	FX.emplace(0x18, &chip8::xFX18);
+	FX.emplace(0x1E, &chip8::xFX1E);
+	FX.emplace(0x29, &chip8::xFX29);
+	FX.emplace(0x33, &chip8::xFX33);
+	FX.emplace(0x55, &chip8::xFX55);
+	FX.emplace(0x65, &chip8::xFX65);
+
+	// opcodes beginning with 0x8 | ID'd by rightmost 
+	x8.emplace(0x0, &chip8::x8XY0);
+	x8.emplace(0x1, &chip8::x8XY1);
+	x8.emplace(0x2, &chip8::x8XY2);
+	x8.emplace(0x3, &chip8::x8XY3);
+	x8.emplace(0x4, &chip8::x8XY4);
+	x8.emplace(0x5, &chip8::x8XY5);
+	x8.emplace(0x6, &chip8::x8XY6);
+	x8.emplace(0x7, &chip8::x8XY7);
+	x8.emplace(0xE, &chip8::x8XYE);
+
+	// opcodes beginning with 0xE
+	EX.emplace(0xE, &chip8::xEX9E);
+	EX.emplace(0x1, &chip8::xEXA1);
+
 }
+
+void chip8::x8Table() {
+	const auto it = x8.find(opcode & 0x000F);
+	if (it != x8.end())
+		it->second;
+	else
+		cerr << "OPCODE in x8 Table: " << (opcode & 0x000F) << " not found " << endl;
+}
+
+void chip8::exTable() {
+	const auto it = EX.find(opcode & 0x000F);
+	if (it != EX.end())
+		it->second;
+	else
+		cerr << "OPCODE in EX Table: " << (opcode & 0x000F) << " not found " << endl;
+}
+
+void chip8::fxTable() {
+	const auto it = FX.find(opcode & 0x00FF);
+	if (it != FX.end())
+		it->second;
+	else
+		cerr << "OPCODE in FX Table: " << (opcode & 0x00FF) << " not found " << endl;
+}
+
+void chip8::x0Table() {
+	const auto it = x0.find(opcode & 0x00FF);
+	if (it != x0.end())
+		it->second;
+	else
+		cerr << "OPCODE in x0 Table: " << (opcode & 0x000F) << " not found " << endl;
+}
+
+
+//void chip8::initialize() {
+//	// reset states 
+//	pc = 0x200;
+//	index = 0;
+//	opcode = 0;
+//	sp = 0;
+//
+//	// Clear display	
+//	/*for (int i = 0; i < 64; i++) {
+//		for (int j = 0; j < 32; j++)
+//			display[i][j] = 0;
+//	}*/
+//	memset(display, 0, 64 * 32 * sizeof(display[0][0]));
+//	// Clear registers V0-VF + stack
+//	for (int i = 0; i < 16; i++) {
+//		registers[i] = 0;
+//		stack[i] = 0;
+//	}
+//	// Clear memory
+//	for (int i = 0; i < 4096; i++)
+//		memory[i] = 0;
+//
+//	// load fontset 
+//	for (int i = 0; i < 80; i++) {
+//		// font set loaded in, beginning at memory location 0x50
+//		memory[0x50 + i] = fontSet[i];  
+//	}
+//	// reset timers
+//	delayTimer = 0;
+//	soundTimer = 0;
+//	// reset display 
+//
+//	
+//}
 
 bool chip8::loadROM(const string& ROM) {
 	// create filestream, open rom file in binary mode, filepointer starting at end
