@@ -198,6 +198,35 @@ void chip8::xCXNN() {
 
 // draw graphics
 void chip8::xDXYN() {
+	// modulo to wrap starting pos
+	uint8_t xpos = registers[X(opcode)];
+	uint8_t ypos = registers[Y(opcode)];
+
+	uint8_t height = N(opcode);
+	uint8_t width = 8;
+	// clear VF
+	registers[0xF] = 0;
+	// loop row by row
+	for (int row = 0; row < height; row++) {
+		// grab 1 byte of sprite
+		uint8_t byte = memory[index + row];
+		for (int col = 0; col < 8; col++) {
+			// grab pixel
+			uint8_t pixel = byte & (0x80 >> col);
+			// if curr pixel on
+			if (pixel == 1) {
+				uint32_t displayPixel = display[col+xpos][(ypos+row)];
+				// if the pixel we want to draw is going to be drawn somewhere where theres already a pixel 
+				// then we have a collision
+				if (displayPixel == 1) {
+					registers[0xF] = 1;
+				}
+				// essentially XOR'ing displayPixel with the new pixel
+				displayPixel ^= 1;
+			}
+		}
+	}
+
 
 }
 
