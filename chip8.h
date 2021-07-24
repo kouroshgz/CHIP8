@@ -5,17 +5,30 @@
 #include <string>
 #include <unordered_map>
 #include <random>
+#include <cstdint>
 using namespace std;
 
 
 class chip8
 {
+
+public:
+	chip8();
+	// keypad
+	uint8_t keypad[16];
+	// display
+	uint32_t display[64][32];
+	// load rom, return 1 if success -1 if not
+	bool loadROM(char const* ROM);
+	// emulate a cycle
+	void cycle();	
 private:
+
 	// function pointer type
-	typedef void (chip8::*instruction)(void); 
+	typedef void (chip8::* instruction)(void);
 	// opcode table (map of function pointers, with key = opcode and value = function pointer
 	typedef unordered_map<uint16_t, instruction> opTable;
-	
+
 	// class opTable object
 	opTable main;
 	opTable x8;
@@ -37,29 +50,18 @@ private:
 	// timers
 	uint8_t delayTimer;
 	uint8_t soundTimer;
-	// keypad
-	uint8_t keypad[16];
-	// display
-	uint32_t display[64][32];
+
 	// opcodes
 	uint16_t opcode;
-	
-	
-public:
-	chip8();
 
+	// --------- methods ----------
 
+	// hashmap callers
 	void x8Table();
 	void exTable();
 	void fxTable();
 	void x0Table();
-// --------- methods ----------
-	// initialize registers, memory, etc to initial state
-	//void initialize();  <--- constructor can do that
-	// load rom, return 1 if success -1 if not
-	bool loadROM(char const* ROM);
-	// emulate a cycle
-	void cycle();
+
 // ---- opcode declarations ----
 	// opcode descriptions from https://en.wikipedia.org/wiki/CHIP-8#Opcode_table
 

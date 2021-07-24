@@ -1,9 +1,9 @@
 #include "chip8.h"
-#define X(op)   ((op & 0x0F00) >> 8)
-#define Y(op)   ((op & 0x00F0) >> 4)
-#define N(op)   (op & 0x000F)
-#define NN(op)  (op & 0x00FF)
-#define NNN(op) (op & 0x0FFF)
+#define X(op)   ((op & 0x0F00u) >> 8u)
+#define Y(op)   ((op & 0x00F0u) >> 4u)
+#define N(op)   (op & 0x000Fu)
+#define NN(op)  (op & 0x00FFu)
+#define NNN(op) (op & 0x0FFFu)
 // pseudo random number generator
 default_random_engine gen;
 uniform_int_distribution<int> distribution(0, 255);
@@ -30,8 +30,8 @@ uint8_t fontSet[80] =
 chip8::chip8() {
 	// reset states 
 	pc = 0x200;
-	index = 0;
 	opcode = 0;
+	index = 0;
 	sp = 0;
 
 	// Clear display	
@@ -114,72 +114,37 @@ chip8::chip8() {
 }
 
 void chip8::x8Table() {
-	const auto it = x8.find(opcode & 0x000F);
+	const auto it = x8.find(opcode & 0x000Fu);
 	if (it != x8.end())
 		(*this.*it->second)();
 	else
-		cerr << "OPCODE in x8 Table: " << (opcode & 0x000F) << " not found " << endl;
+		cerr << "OPCODE in x8 Table: " << (opcode & 0x000Fu) << " not found " << endl;
 }
 
 void chip8::exTable() {
-	const auto it = EX.find(opcode & 0x000F);
+	const auto it = EX.find(opcode & 0x000Fu);
 	if (it != EX.end())
 		(*this.*it->second)();
 	else
-		cerr << "OPCODE in EX Table: " << (opcode & 0x000F) << " not found " << endl;
+		cerr << "OPCODE in EX Table: " << (opcode & 0x000Fu) << " not found " << endl;
 }
 
 void chip8::fxTable() {
-	const auto it = FX.find(opcode & 0x00FF);
+	const auto it = FX.find(opcode & 0x00FFu);
 	if (it != FX.end())
 		(*this.*it->second)();
 	else
-		cerr << "OPCODE in FX Table: " << (opcode & 0x00FF) << " not found " << endl;
+		cerr << "OPCODE in FX Table: " << (opcode & 0x00FFu) << " not found " << endl;
 }
 
 void chip8::x0Table() {
-	const auto it = x0.find(opcode & 0x00FF);
+	const auto it = x0.find(opcode & 0x000Fu);
 	if (it != x0.end())
 		(*this.*it->second)();
 	else
-		cerr << "OPCODE in x0 Table: " << (opcode & 0x000F) << " not found " << endl;
+		cerr << "OPCODE in x0 Table: " << (opcode & 0x000Fu) << " not found " << endl;
 }
 
-
-//void chip8::initialize() {
-//	// reset states 
-//	pc = 0x200;
-//	index = 0;
-//	opcode = 0;
-//	sp = 0;
-//
-//	// Clear display	
-//	/*for (int i = 0; i < 64; i++) {
-//		for (int j = 0; j < 32; j++)
-//			display[i][j] = 0;
-//	}*/
-//	memset(display, 0, 64 * 32 * sizeof(display[0][0]));
-//	// Clear registers V0-VF + stack
-//	for (int i = 0; i < 16; i++) {
-//		registers[i] = 0;
-//		stack[i] = 0;
-//	}
-//	// Clear memory
-//	for (int i = 0; i < 4096; i++)
-//		memory[i] = 0;
-//
-//	// load fontset 
-//	for (int i = 0; i < 80; i++) {
-//		// font set loaded in, beginning at memory location 0x50
-//		memory[0x50 + i] = fontSet[i];  
-//	}
-//	// reset timers
-//	delayTimer = 0;
-//	soundTimer = 0;
-//	// reset display 
-//
-//	
-//}
 
 bool chip8::loadROM(char const* ROM) {
 	// create filestream, open rom file in binary mode, filepointer starting at end
@@ -305,7 +270,7 @@ void chip8::x9XY0() {
 // opcode to set index to address NNN
 void chip8::xANNN() {
 	///uint16_t addr = (opcode & 0x0FFF);
-	pc = NNN(opcode);
+	index = NNN(opcode);
 }
 
 //Jumps to the address NNN plus V0.
@@ -537,7 +502,8 @@ void chip8::cycle() {
 	/*
 	lhsf 8 bits OR'd with pc+1 to complete opcode
 	*/
-	uint16_t opcode = memory[pc] << 8 | memory[pc + 1];
+	opcode = memory[pc] << 8 | memory[pc + 1];
+	cout << "OPCODE is: " << ((opcode & 0xF000) >> 12) << endl;
 	// increment PC
 	pc += 2;
 
