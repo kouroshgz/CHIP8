@@ -7,9 +7,6 @@
 #include <random>
 using namespace std;
 
-// pseudo random number generator
-default_random_engine gen;
-uniform_int_distribution<int> distribution(0, 255);
 
 class chip8
 {
@@ -46,6 +43,9 @@ private:
 	uint32_t display[64][32];
 	// opcodes
 	uint16_t opcode;
+	
+	
+public:
 	chip8();
 
 
@@ -53,13 +53,11 @@ private:
 	void exTable();
 	void fxTable();
 	void x0Table();
-	
-public:
 // --------- methods ----------
 	// initialize registers, memory, etc to initial state
 	//void initialize();  <--- constructor can do that
 	// load rom, return 1 if success -1 if not
-	bool loadROM(const string& ROM);
+	bool loadROM(char const* ROM);
 	// emulate a cycle
 	void cycle();
 // ---- opcode declarations ----

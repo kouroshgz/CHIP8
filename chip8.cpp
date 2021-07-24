@@ -4,7 +4,9 @@
 #define N(op)   (op & 0x000F)
 #define NN(op)  (op & 0x00FF)
 #define NNN(op) (op & 0x0FFF)
-
+// pseudo random number generator
+default_random_engine gen;
+uniform_int_distribution<int> distribution(0, 255);
 uint8_t fontSet[80] =
 {
 	0xF0, 0x90, 0x90, 0x90, 0xF0, //0
@@ -114,7 +116,7 @@ chip8::chip8() {
 void chip8::x8Table() {
 	const auto it = x8.find(opcode & 0x000F);
 	if (it != x8.end())
-		it->second;
+		(*this.*it->second)();
 	else
 		cerr << "OPCODE in x8 Table: " << (opcode & 0x000F) << " not found " << endl;
 }
@@ -122,7 +124,7 @@ void chip8::x8Table() {
 void chip8::exTable() {
 	const auto it = EX.find(opcode & 0x000F);
 	if (it != EX.end())
-		it->second;
+		(*this.*it->second)();
 	else
 		cerr << "OPCODE in EX Table: " << (opcode & 0x000F) << " not found " << endl;
 }
@@ -130,7 +132,7 @@ void chip8::exTable() {
 void chip8::fxTable() {
 	const auto it = FX.find(opcode & 0x00FF);
 	if (it != FX.end())
-		it->second;
+		(*this.*it->second)();
 	else
 		cerr << "OPCODE in FX Table: " << (opcode & 0x00FF) << " not found " << endl;
 }
@@ -138,7 +140,7 @@ void chip8::fxTable() {
 void chip8::x0Table() {
 	const auto it = x0.find(opcode & 0x00FF);
 	if (it != x0.end())
-		it->second;
+		(*this.*it->second)();
 	else
 		cerr << "OPCODE in x0 Table: " << (opcode & 0x000F) << " not found " << endl;
 }
@@ -179,9 +181,9 @@ void chip8::x0Table() {
 //	
 //}
 
-bool chip8::loadROM(const string& ROM) {
+bool chip8::loadROM(char const* ROM) {
 	// create filestream, open rom file in binary mode, filepointer starting at end
-	ifstream file(ROM, ios::binary, ios::ate);
+	ifstream file(ROM, ios::binary | ios::ate);
 	if (file.is_open()) {
 		// get file size
 		int size = file.tellg();
@@ -536,33 +538,20 @@ void chip8::cycle() {
 	lhsf 8 bits OR'd with pc+1 to complete opcode
 	*/
 	uint16_t opcode = memory[pc] << 8 | memory[pc + 1];
+	// increment PC
+	pc += 2;
 
-	// decoding opcodes
-	//switch (opcode & 0xF000) {
-	//	case 0x0000:
-	//		switch (opcode & 0x000F) { // case for opcodes beginning with 0x0
-	//			case 0x0000: // 0x00E0 clear screen opcode
-	//				/* implement here later*/
-	//			break;
+	// decode opcode | rhs by 12 to get single digit key for main table
+	const auto it = main.find( (opcode & 0xF000) >> 12);
+	if (it != main.end())
+		(*this.*it->second)();
+	else
+		cerr << "OPCODE ID in main Table: " << ( (opcode & 0x000F) >> 12) << " not found " << endl;
 
-	//			case 0x000E: // 0x00EE return from subroutine opcode
-	//				/* implement here later */
-	//			break;
+	// decrement timers if applicable
+	if (delayTimer > 0)
+		--delayTimer;
 
-	//			default:
-	//				cout << "Unknown OPCODE: " << opcode << endl;
-	//		}
-	//	break;
-	//	
-	//	// ANNN: Sets index to addr NNN
-	//	case 0xA000:
-	//		index = opcode & 0x0FFF;
-	//		pc += 2;
-	//	break;
-
-	//	default:
-	//		cout << "Opcode unknown: " << opcode << endl; 
-
-	//}
-
+	if (soundTimer > 0)
+		--soundTimer;
 }
