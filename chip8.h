@@ -17,11 +17,12 @@ public:
 	// keypad
 	uint8_t keypad[16];
 	// display
-	uint32_t display[64][32];
+	uint32_t display[64*32];
 	// load rom, return 1 if success -1 if not
 	bool loadROM(char const* ROM);
 	// emulate a cycle
 	void cycle();	
+	bool drawFlag;
 private:
 
 	// function pointer type
@@ -50,7 +51,6 @@ private:
 	// timers
 	uint8_t delayTimer;
 	uint8_t soundTimer;
-
 	// opcodes
 	uint16_t opcode;
 

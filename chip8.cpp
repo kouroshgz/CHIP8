@@ -33,13 +33,13 @@ chip8::chip8() {
 	opcode = 0;
 	index = 0;
 	sp = 0;
-
+	drawFlag = false;
 	// Clear display	
 	/*for (int i = 0; i < 64; i++) {
 		for (int j = 0; j < 32; j++)
 			display[i][j] = 0;
 	}*/
-	memset(display, 0, 64 * 32 * sizeof(display[0][0]));
+	memset(display, 0, 64 * 32 * sizeof(display[0]));
 	// Clear registers V0-VF + stack
 	for (int i = 0; i < 16; i++) {
 		registers[i] = 0;
@@ -176,7 +176,7 @@ bool chip8::loadROM(char const* ROM) {
 
 // 00E0 - dispay clear opcode
 void chip8::x00E0() {
-	memset(display, 0, 64 * 32 * sizeof(display[0][0]));
+	memset(display, 0, 64 * 32 * sizeof(display[0]));
 }
 // 00EE - return from subroutine
 void chip8::x00EE() {
@@ -292,8 +292,8 @@ void chip8::xDXYN() {
 	uint8_t xpos = registers[X(opcode)];
 	uint8_t ypos = registers[Y(opcode)];
 
-	uint8_t height = N(opcode);
-	uint8_t width = 8;
+	uint8_t height = N(opcode)+1;
+	
 	// clear VF
 	registers[0xF] = 0;
 	// loop row by row
@@ -302,22 +302,21 @@ void chip8::xDXYN() {
 		uint8_t byte = memory[index + row];
 		for (int col = 0; col < 8; col++) {
 			// grab pixel
-			uint8_t pixel = byte & (0x80 >> col);
+			uint8_t pixel = (byte & (0x80u >> col) );
+			uint32_t *displayPixel = &display[(col + xpos) + ((ypos + row) * 64)];
 			// if curr pixel on
-			if (pixel == 1) {
-				uint32_t displayPixel = display[col+xpos][(ypos+row)];
+			if (pixel != 0) {
 				// if the pixel we want to draw is going to be drawn somewhere where theres already a pixel 
 				// then we have a collision
-				if (displayPixel == 1) {
+				if (*displayPixel != 0) {
 					registers[0xF] = 1;
 				}
 				// essentially XOR'ing displayPixel with the new pixel
-				displayPixel ^= 1;
+				*displayPixel ^= 0xFFFFFFFF;
 			}
 		}
 	}
-
-
+	drawFlag = true;
 }
 
 // 8XY0 - Sets VX to value of VY
@@ -484,7 +483,7 @@ void chip8::xFX33() {
 // Stores V0 to VX (including VX) in memory starting at address I. 
 // The offset from I is increased by 1 for each value written, but I itself is left unmodified
 void chip8::xFX55() {
-	for (int i = 0; i <= X(opcode); i++) {
+	for (unsigned int i = 0; i <= X(opcode); i++) {
 		memory[index + i] = registers[i];
 	}
 }
@@ -492,7 +491,7 @@ void chip8::xFX55() {
 // Fills V0 to VX(including VX) with values from memory starting at address I.
 // The offset from I is increased by 1 for each value written, but I itself is left unmodified
 void chip8::xFX65() {
-	for (int i = 0; i <= X(opcode); i++) {
+	for (unsigned int i = 0; i <= X(opcode); i++) {
 		registers[i] = memory[index + i];
 	}
 }
@@ -514,6 +513,7 @@ void chip8::cycle() {
 	else
 		cerr << "OPCODE ID in main Table: " << ( (opcode & 0x000F) >> 12) << " not found " << endl;
 
+	
 	// decrement timers if applicable
 	if (delayTimer > 0)
 		--delayTimer;
