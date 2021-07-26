@@ -5,7 +5,7 @@
 #include <chrono>
 #undef main
 int main(int argc, char* argv[]) {
-	char const* file = "BC_test.ch8";
+	char const* file = "Space Invaders.ch8";
 	chip8 chip8;
 	bool exit = false;
 	Frontend graphics(64, 32, 64, 32);

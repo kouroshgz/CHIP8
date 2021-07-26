@@ -35,11 +35,10 @@ chip8::chip8() {
 	sp = 0;
 	drawFlag = false;
 	// Clear display	
-	/*for (int i = 0; i < 64; i++) {
-		for (int j = 0; j < 32; j++)
-			display[i][j] = 0;
-	}*/
-	memset(display, 0, 64 * 32 * sizeof(display[0]));
+	for (int i = 0; i < 64*32; i++) {
+			display[i] = 0;
+	}
+	//memset(display, 0, 64 * 32 * sizeof(display[0]));
 	// Clear registers V0-VF + stack
 	for (int i = 0; i < 16; i++) {
 		registers[i] = 0;
@@ -176,7 +175,10 @@ bool chip8::loadROM(char const* ROM) {
 
 // 00E0 - dispay clear opcode
 void chip8::x00E0() {
-	memset(display, 0, 64 * 32 * sizeof(display[0]));
+	//memset(display, 0, 64 * 32 * sizeof(display[0]));
+	for (int i = 0; i < 64 * 32; i++) {
+		display[i] = 0;
+	}
 }
 // 00EE - return from subroutine
 void chip8::x00EE() {
@@ -407,7 +409,7 @@ void chip8::x8XY7() {
 void chip8::x8XYE() {
 //	uint8_t X = (opcode & 0x0F00) >> 8;
 	// grab MSB 0x80
-	registers[0xF] = registers[X(opcode)] & 0x80;
+	registers[0xF] = (registers[X(opcode)] & 0x80) >> 7;
 	// VX = VX << 1
 	registers[X(opcode)] <<= 1;
 }
