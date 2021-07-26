@@ -113,33 +113,33 @@ chip8::chip8() {
 }
 
 void chip8::x8Table() {
-	const auto it = x8.find(opcode & 0x000Fu);
-	if (it != x8.end())
-		(*this.*it->second)();
+	const auto it2 = x8.find(opcode & 0x000Fu);
+	if (it2 != x8.end())
+		(*this.*it2->second)();
 	else
 		cerr << "OPCODE in x8 Table: " << (opcode & 0x000Fu) << " not found " << endl;
 }
 
 void chip8::exTable() {
-	const auto it = EX.find(opcode & 0x000Fu);
-	if (it != EX.end())
-		(*this.*it->second)();
+	const auto it2 = EX.find(opcode & 0x000Fu);
+	if (it2 != EX.end())
+		(*this.*it2->second)();
 	else
 		cerr << "OPCODE in EX Table: " << (opcode & 0x000Fu) << " not found " << endl;
 }
 
 void chip8::fxTable() {
-	const auto it = FX.find(opcode & 0x00FFu);
-	if (it != FX.end())
-		(*this.*it->second)();
+	const auto it2 = FX.find(opcode & 0x00FFu);
+	if (it2 != FX.end())
+		(*this.*it2->second)();
 	else
 		cerr << "OPCODE in FX Table: " << (opcode & 0x00FFu) << " not found " << endl;
 }
 
 void chip8::x0Table() {
-	const auto it = x0.find(opcode & 0x000Fu);
-	if (it != x0.end())
-		(*this.*it->second)();
+	const auto it2 = x0.find(opcode & 0x000Fu);
+	if (it2 != x0.end())
+		(*this.*it2->second)();
 	else
 		cerr << "OPCODE in x0 Table: " << (opcode & 0x000Fu) << " not found " << endl;
 }
@@ -291,10 +291,10 @@ void chip8::xCXNN() {
 // draw graphics
 void chip8::xDXYN() {
 	// modulo to wrap starting pos
-	uint8_t xpos = registers[X(opcode)];
-	uint8_t ypos = registers[Y(opcode)];
+	uint8_t xpos = registers[X(opcode)] % 64;
+	uint8_t ypos = registers[Y(opcode)] % 32;
 
-	uint8_t height = N(opcode)+1;
+	uint8_t height = N(opcode);
 	
 	// clear VF
 	registers[0xF] = 0;

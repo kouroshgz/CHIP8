@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
 			chip8.drawFlag = false;
 			graphics.refresh(chip8.display, 64 * sizeof(uint32_t));
 		}
-		std::this_thread::sleep_for(std::chrono::microseconds(12000));
+		std::this_thread::sleep_for(std::chrono::microseconds(1200));
 	}
 	return 0;
 }
