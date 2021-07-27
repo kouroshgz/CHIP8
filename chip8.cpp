@@ -43,6 +43,7 @@ chip8::chip8() {
 	for (int i = 0; i < 16; i++) {
 		registers[i] = 0;
 		stack[i] = 0;
+		keypad[i] = 0;
 	}
 	// Clear memory
 	for (int i = 0; i < 4096; i++)
@@ -442,9 +443,17 @@ void chip8::xFX07() {
 
 //A key press is awaited, and then stored in VX. (Blocking Operation.All instruction halted until next key event)
 void chip8::xFX0A() {
+	bool waitFlag = true;
 	for (int i = 0; i < 16; i++) {
-		if (keypad[i])
+		if (keypad[i]) {
 			registers[X(opcode)] = i;
+			waitFlag = false;
+			break;
+		}
+	}
+
+	if (waitFlag) {
+		pc -= 2;
 	}
 }
 

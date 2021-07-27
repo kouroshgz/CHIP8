@@ -5,6 +5,7 @@ class Frontend
 public:
 	Frontend(int displayWidth, int displayHeight, int textureWidth, int textureHeight);
 	void refresh(void const* buffer, int pitch);
+	bool getInput(uint8_t* keypad);
 	~Frontend() {
 		SDL_DestroyTexture(texture);
 		SDL_DestroyRenderer(renderer);

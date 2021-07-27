@@ -5,21 +5,22 @@
 #include <chrono>
 #undef main
 int main(int argc, char* argv[]) {
-	char const* file = "Space Invaders.ch8";
+	char const* file = "sctest.c8";
 	chip8 chip8;
 	bool exit = false;
-	Frontend graphics(64, 32, 64, 32);
+	Frontend frontend(64, 32, 64, 32);
 	chip8.loadROM(file);
 	
 	
 
 	while (!exit) {
+		exit = frontend.getInput(chip8.keypad);
 		chip8.cycle();
 		
 
 		if (chip8.drawFlag) {
 			chip8.drawFlag = false;
-			graphics.refresh(chip8.display, 64 * sizeof(uint32_t));
+			frontend.refresh(chip8.display, 64 * sizeof(uint32_t));
 		}
 		std::this_thread::sleep_for(std::chrono::microseconds(1200));
 	}
