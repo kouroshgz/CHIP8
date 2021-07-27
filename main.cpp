@@ -5,7 +5,7 @@
 #include <chrono>
 #undef main
 int main(int argc, char* argv[]) {
-	char const* file = "sctest.c8";
+	char const* file = "Tron.ch8";
 	chip8 chip8;
 	bool exit = false;
 	Frontend frontend(64, 32, 64, 32);
@@ -22,7 +22,7 @@ int main(int argc, char* argv[]) {
 			chip8.drawFlag = false;
 			frontend.refresh(chip8.display, 64 * sizeof(uint32_t));
 		}
-		std::this_thread::sleep_for(std::chrono::microseconds(1200));
+		std::this_thread::sleep_for(std::chrono::microseconds(100));
 	}
 	return 0;
 }

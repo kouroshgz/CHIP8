@@ -34,20 +34,26 @@ bool Frontend::getInput(uint8_t* keypad) {
 			if (state[SDL_SCANCODE_ESCAPE])
 				quit = true;
 			if (state[SDL_SCANCODE_1]) {
+				keypad[0] = 1;
+			}
+			else {
+				keypad[0] = 0;
+			}
+
+			if (state[SDL_SCANCODE_2]) {
 				keypad[1] = 1;
 			}
 			else {
 				keypad[1] = 0;
 			}
 
-			if (state[SDL_SCANCODE_2]) {
+			if (state[SDL_SCANCODE_3]) {
 				keypad[2] = 1;
 			}
 			else {
 				keypad[2] = 0;
 			}
-
-			if (state[SDL_SCANCODE_3]) {
+			if (state[SDL_SCANCODE_4]) {
 				keypad[3] = 1;
 			}
 			else {
@@ -60,6 +66,84 @@ bool Frontend::getInput(uint8_t* keypad) {
 			else {
 				keypad[4] = 0;
 			}
+
+			if (state[SDL_SCANCODE_W]) {
+				keypad[5] = 1;
+			}
+			else {
+				keypad[5] = 0;
+			}
+
+			if (state[SDL_SCANCODE_E]) {
+				keypad[6] = 1;
+			}
+			else {
+				keypad[6] = 0;
+			}
+
+			if (state[SDL_SCANCODE_R]) {
+				keypad[7] = 1;
+			}
+			else {
+				keypad[7] = 0;
+			}
+
+			if (state[SDL_SCANCODE_A]) {
+				keypad[8] = 1;
+			}
+			else {
+				keypad[8] = 0;
+			}
+
+			if (state[SDL_SCANCODE_S]) {
+				keypad[9] = 1;
+			}
+			else {
+				keypad[9] = 0;
+			}
+
+			if (state[SDL_SCANCODE_D]) {
+				keypad[0xA] = 1;
+			}
+			else {
+				keypad[0xA] = 0;
+			}
+
+			if (state[SDL_SCANCODE_F]) {
+				keypad[0xB] = 1;
+			}
+			else {
+				keypad[0xB] = 0;
+			}
+
+			if (state[SDL_SCANCODE_Z]) {
+				keypad[0xC] = 1;
+			}
+			else {
+				keypad[0xC] = 0;
+			}
+
+			if (state[SDL_SCANCODE_X]) {
+				keypad[0xD] = 1;
+			}
+			else {
+				keypad[0xD] = 0;
+			}
+
+			if (state[SDL_SCANCODE_C]) {
+				keypad[0xE] = 1;
+			}
+			else {
+				keypad[0xE] = 0;
+			}
+
+			if (state[SDL_SCANCODE_V]) {
+				keypad[0xF] = 1;
+			}
+			else {
+				keypad[0xF] = 0;
+			}
+
 			break;
 		}
 		break;
