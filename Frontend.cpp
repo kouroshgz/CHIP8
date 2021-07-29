@@ -4,7 +4,7 @@ Frontend::Frontend(int displayWidth, int displayHeight, int textureWidth, int te
 	SDL_Init(SDL_INIT_VIDEO);
 
 	// create display window
-	window = SDL_CreateWindow("CHIP-8 EMU", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, displayWidth*8, displayHeight*8, SDL_WINDOW_SHOWN);
+	window = SDL_CreateWindow("CHIP-8 EMU", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, displayWidth, displayHeight, SDL_WINDOW_SHOWN);
 	// create hardware accelerated renderer 
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 	// create texture for rendering context

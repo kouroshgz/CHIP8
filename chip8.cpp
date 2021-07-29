@@ -176,10 +176,8 @@ bool chip8::loadROM(char const* ROM) {
 
 // 00E0 - dispay clear opcode
 void chip8::x00E0() {
-	//memset(display, 0, 64 * 32 * sizeof(display[0]));
-	for (int i = 0; i < 64 * 32; i++) {
-		display[i] = 0;
-	}
+	memset(display, 0, 64 * 32 * sizeof(display[0]));
+	
 }
 // 00EE - return from subroutine
 void chip8::x00EE() {
@@ -190,15 +188,12 @@ void chip8::x00EE() {
 }
 // 1NNN - jump to address NNN
 void chip8::x1NNN() {
-	// obtain address NNN
-	//uint16_t addr = opcode & 0x0FFF;
 	// set program counter to NNN
 	pc = NNN(opcode); 
 }
 
 // 2NNN - call subroutine at NNN
 void chip8::x2NNN() {
-	//uint16_t addr = opcode & 0x0FFF;
 	
 	// move PC to top of stack, holds instruction after call()
 	stack[sp] = pc;
@@ -210,10 +205,6 @@ void chip8::x2NNN() {
 
 // 3XNN - skip next instr if VX == NN
 void chip8::x3XNN(){
-	// get register identifier
-//	uint8_t X = (opcode & 0x0F00) >> 8;
-	// get 8 bit const
-//	uint8_t NN = (opcode & 0x00FF);
 	// if VX == NN, skip
 	if (registers[X(opcode)] == NN(opcode) )
 		pc += 2;
@@ -221,10 +212,6 @@ void chip8::x3XNN(){
 
 // 4XNN - skip next instruction if VX != NN
 void chip8::x4XNN() {
-	// get register identifier
-//	uint8_t X = (opcode & 0x0F00) >> 8;
-	// get 8 bit const
-//	uint8_t NN = (opcode & 0x00FF);
 	// if VX != NN, skip
 	if (registers[X(opcode)] != NN(opcode))
 		pc += 2;
@@ -232,59 +219,38 @@ void chip8::x4XNN() {
 
 // 5XY0 - Skips next instruction if VX == VY
 void chip8::x5XY0() {
-	// get register identifier
-//	uint8_t X = (opcode & 0x0F00) >> 8;
-//	uint8_t Y = (opcode & 0x00F0) >> 4;
-
 	if (registers[X(opcode)] == registers[Y(opcode)])
 		pc += 2; 
 }
 
 // 6XNN - set VX to NN
 void chip8::x6XNN() {
-	// get register identifier
-//	uint8_t X = (opcode & 0x0F00) >> 8;
-	// get NN
-//	uint8_t NN = (opcode & 0x00FF);
-
 	registers[X(opcode)] = NN(opcode);
 }
 
 // 7XNN - adds NN to VX, dont change carry flag
 void chip8::x7XNN() {
-	// get register identifier
-//	uint8_t X = (opcode & 0x0F00) >> 8;
-	// get NN
-//	uint8_t NN = (opcode & 0x00FF);
-
 	registers[X(opcode)] += NN(opcode);
 }
 
 //Skips the next instruction if VX does not equal VY. (Usually the next instruction is a jump to skip a code block);
 void chip8::x9XY0() {
-	// get register identifier
-//	uint8_t X = (opcode & 0x0F00) >> 8;
-//	uint8_t Y = (opcode & 0x00F0) >> 4;
-
 	if (registers[X(opcode)] != registers[Y(opcode)])
 		pc += 2;
 }
 
 // opcode to set index to address NNN
 void chip8::xANNN() {
-	///uint16_t addr = (opcode & 0x0FFF);
 	index = NNN(opcode);
 }
 
 //Jumps to the address NNN plus V0.
 void chip8::xBNNN() {
-	//uint16_t addr = (opcode & 0x0FFF) + registers[0];
 	pc = NNN(opcode); 
 }
 
 //Sets VX to the result of a bitwise and operation on a random number (Typically: 0 to 255) and NN
 void chip8::xCXNN() {
-	//uint8_t NN = (opcode & 0x0FF);
 	uint8_t random = distribution(gen);
 	registers[X(opcode)] = NN(opcode) & random;
 }
@@ -324,40 +290,26 @@ void chip8::xDXYN() {
 
 // 8XY0 - Sets VX to value of VY
 void chip8::x8XY0() {
-//	uint8_t X = (opcode & 0x0F00) >> 8;
-//	uint8_t Y = (opcode & 0x00F0) >> 4;
-	
 	registers[X(opcode)] = registers[Y(opcode)];
 }
 
 //Sets VX to VX or VY. (Bitwise OR operation)
 void chip8::x8XY1() {
-	//uint8_t X = (opcode & 0x0F00) >> 8;
-//	uint8_t Y = (opcode & 0x00F0) >> 4;
-
 	registers[X(opcode)] = (registers[X(opcode)] | registers[Y(opcode)]);
 }
 
 //Sets VX to VXand VY. (Bitwise AND operation);
 void chip8::x8XY2() {
-	//uint8_t X = (opcode & 0x0F00) >> 8;
-	//uint8_t Y = (opcode & 0x00F0) >> 4;
-
 	registers[X(opcode)] = (registers[X(opcode)] & registers[Y(opcode)]);
 }
 
 //Sets VX to VX xor VY.
 void chip8::x8XY3() {
-	//uint8_t X = (opcode & 0x0F00) >> 8;
-	//uint8_t Y = (opcode & 0x00F0) >> 4;
-
 	registers[X(opcode)] = (registers[X(opcode)] ^ registers[Y(opcode)]);
 }
 
 //Adds VY to VX.VF is set to 1 when there's a carry, and to 0 when there is not.
 void chip8::x8XY4() {
-	//uint8_t X = (opcode & 0x0F00) >> 8;
-	//uint8_t Y = (opcode & 0x00F0) >> 4;
 	uint16_t sum = registers[X(opcode)] + registers[Y(opcode)];
 	// carry occurs when sum > 8 bits (255)
 	if (sum > 255)
@@ -372,8 +324,6 @@ void chip8::x8XY4() {
 
 //VY is subtracted from VX.VF is set to 0 when there's a borrow, and 1 when there is not.
 void chip8::x8XY5() {
-	//uint8_t X = (opcode & 0x0F00) >> 8;
-	//uint8_t Y = (opcode & 0x00F0) >> 4;
 	// if no borrow
 	if (registers[X(opcode)] >= registers[Y(opcode)])
 		registers[0xF] = 1;		// VF = 1
@@ -386,7 +336,6 @@ void chip8::x8XY5() {
 
 //Stores the least significant bit of VX in VF and then shifts VX to the right by 1.
 void chip8::x8XY6() {
-	//uint8_t X = (opcode & 0x0F00) >> 8;
 	// grab LSB 0x01
 	registers[0xF] = registers[X(opcode)] & 0x01; 
 	registers[X(opcode)] >>= 1;
@@ -394,8 +343,6 @@ void chip8::x8XY6() {
 
 //Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there is not.
 void chip8::x8XY7() {
-//	uint8_t X = (opcode & 0x0F00) >> 8;
-//	uint8_t Y = (opcode & 0x00F0) >> 4;
 	// if no borrow
 	if (registers[Y(opcode)] >= registers[X(opcode)])
 		registers[0xF] = 1;		// VF = 1
@@ -408,7 +355,6 @@ void chip8::x8XY7() {
 
 //Stores the most significant bit of VX in VF and then shifts VX to the left by 1.
 void chip8::x8XYE() {
-//	uint8_t X = (opcode & 0x0F00) >> 8;
 	// grab MSB 0x80
 	registers[0xF] = (registers[X(opcode)] & 0x80) >> 7;
 	// VX = VX << 1
@@ -417,7 +363,6 @@ void chip8::x8XYE() {
 
 //Skips the next instruction if the key stored in VX is pressed. (Usually the next instruction is a jump to skip a code block)
 void chip8::xEX9E() {
-//	uint8_t X = (opcode & 0x0F00) >> 8;
 	// store key value
 	uint8_t key = registers[X(opcode)];
 	// if key pressed, skip instruction
@@ -427,7 +372,6 @@ void chip8::xEX9E() {
 
 // Skips the next instruction if the key stored in VX is not pressed. (Usually the next instruction is a jump to skip a code block);
 void chip8::xEXA1() {
-	//uint8_t X = (opcode & 0x0F00) >> 8;
 	// store key value
 	uint8_t key = registers[X(opcode)];
 	// if key not pressed, skip instruction
